@@ -33,7 +33,7 @@ const LOGO_SIZE = 130
 function TechBadge({ children, color }: { children: React.ReactNode; color: string }) {
   return (
     <div
-      className="flex size-full items-center justify-center rounded-full border border-slate-700 bg-slate-800 shadow-lg"
+      className="flex size-full items-center justify-center rounded-full border border-slate-700 bg-slate-800 shadow-lg opacity-30 transition-opacity duration-200 hover:opacity-100"
       style={{ color }}
     >
       {children}
@@ -75,9 +75,11 @@ const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
           />
 
           {/* Envuelve ambos anillos en su propio flex centrado (mismo truco de
-              static-position que ya arregla el centrado) para poder bajarle
-              la opacidad a la órbita completa sin afectar al logo. */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-30">
+              static-position que ya arregla el centrado). La opacidad ya NO
+              va acá — un opacity en el padre limita a todos los hijos como
+              techo, así que cada ícono nunca podría "superarlo" en hover.
+              Por eso el opacity-30 + hover:opacity-100 vive en TechBadge. */}
+          <div className="absolute inset-0 flex items-center justify-center">
             <OrbitingCircles radius={90} duration={64} iconSize={32} reverse>
               {INNER_STACK.map((tech, i) => (
                 <TechBadge key={i} color={tech.color}>
