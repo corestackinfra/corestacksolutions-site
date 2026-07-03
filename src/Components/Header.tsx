@@ -4,9 +4,6 @@ import { SiTypescript, SiFirebase, SiNestjs, SiTailwindcss } from 'react-icons/s
 import { OrbitingCircles } from './magicui/OrbitingCircles'
 import Navbar from './Navbar'
 import type { MainData, Language } from '../types'
-import corestackLogo from '../assets/corestack.png'
-
-const ELECTRIC_BLUE = '#0EA5FF'
 
 interface HeaderProps {
   data: MainData
@@ -61,11 +58,9 @@ const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
         className="flex flex-col items-center gap-6 max-w-3xl"
       >
         <div className="relative flex h-72 w-72 items-center justify-center md:h-80 md:w-80">
-          <img
-            src={corestackLogo}
-            alt="Corestack"
-            className="w-20 md:w-24 opacity-95"
-          />
+          <span className="text-2xl md:text-3xl font-black tracking-tight text-white">
+            corestack<span className="text-blue-400">.</span>
+          </span>
 
           <OrbitingCircles radius={80} duration={16} iconSize={40} reverse>
             {INNER_STACK.map((tech, i) => (
@@ -83,11 +78,6 @@ const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
             ))}
           </OrbitingCircles>
         </div>
-
-        <p className="text-xl md:text-2xl font-bold tracking-tight -mt-2">
-          <span className="text-white">Corestack</span>{' '}
-          <span style={{ color: ELECTRIC_BLUE }}>Solutions</span>
-        </p>
 
         <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight">
           {data.name}
