@@ -78,7 +78,7 @@ const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
               static-position que ya arregla el centrado) para poder bajarle
               la opacidad a la órbita completa sin afectar al logo. */}
           <div className="absolute inset-0 flex items-center justify-center opacity-30">
-            <OrbitingCircles radius={90} duration={32} iconSize={32} reverse>
+            <OrbitingCircles radius={90} duration={64} iconSize={32} reverse>
               {INNER_STACK.map((tech, i) => (
                 <TechBadge key={i} color={tech.color}>
                   {tech.icon}
@@ -86,7 +86,7 @@ const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
               ))}
             </OrbitingCircles>
 
-            <OrbitingCircles radius={135} duration={52} iconSize={38}>
+            <OrbitingCircles radius={135} duration={104} iconSize={38}>
               {OUTER_STACK.map((tech, i) => (
                 <TechBadge key={i} color={tech.color}>
                   {tech.icon}
