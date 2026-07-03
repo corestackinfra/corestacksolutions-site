@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
-import { FaFacebook, FaWhatsapp, FaChevronDown } from 'react-icons/fa'
-import Logo from './Logo'
+import { FaFacebook, FaWhatsapp, FaChevronDown, FaReact, FaNodeJs, FaAndroid, FaApple } from 'react-icons/fa'
+import { SiTypescript, SiFirebase, SiNestjs, SiTailwindcss } from 'react-icons/si'
+import { OrbitingCircles } from './magicui/OrbitingCircles'
 import Navbar from './Navbar'
 import type { MainData, Language } from '../types'
 
@@ -20,6 +21,31 @@ const SECTORS: Record<string, string[]> = {
   ES: ['Restaurantes', 'Agricultura', 'Industria', 'Residenciales', 'Educación', 'Salud', 'Logística', 'Comercio', 'Construcción'],
 }
 
+function TechBadge({ children, color }: { children: React.ReactNode; color: string }) {
+  return (
+    <div
+      className="flex size-full items-center justify-center rounded-full border border-slate-700 bg-slate-800 shadow-lg"
+      style={{ color }}
+    >
+      {children}
+    </div>
+  )
+}
+
+const INNER_STACK = [
+  { icon: <FaReact size={22} />, color: '#61DAFB' },
+  { icon: <SiTypescript size={20} />, color: '#3178C6' },
+  { icon: <SiFirebase size={20} />, color: '#FFCA28' },
+  { icon: <FaNodeJs size={22} />, color: '#3C873A' },
+]
+
+const OUTER_STACK = [
+  { icon: <SiNestjs size={22} />, color: '#E0234E' },
+  { icon: <FaAndroid size={22} />, color: '#3DDC84' },
+  { icon: <FaApple size={22} />, color: '#E5E7EB' },
+  { icon: <SiTailwindcss size={22} />, color: '#38BDF8' },
+]
+
 const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
   <section id="home" className="relative min-h-screen bg-slate-900 flex flex-col">
     <Navbar language={language} toggleLanguage={toggleLanguage} />
@@ -31,7 +57,27 @@ const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
         transition={{ duration: 0.8 }}
         className="flex flex-col items-center gap-6 max-w-3xl"
       >
-        <Logo />
+        <div className="relative flex h-72 w-72 items-center justify-center md:h-80 md:w-80">
+          <span className="text-2xl md:text-3xl font-black tracking-tight text-white">
+            corestack<span className="text-blue-400">.</span>
+          </span>
+
+          <OrbitingCircles radius={80} duration={16} iconSize={40} reverse>
+            {INNER_STACK.map((tech, i) => (
+              <TechBadge key={i} color={tech.color}>
+                {tech.icon}
+              </TechBadge>
+            ))}
+          </OrbitingCircles>
+
+          <OrbitingCircles radius={135} duration={26} iconSize={44}>
+            {OUTER_STACK.map((tech, i) => (
+              <TechBadge key={i} color={tech.color}>
+                {tech.icon}
+              </TechBadge>
+            ))}
+          </OrbitingCircles>
+        </div>
 
         <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight">
           {data.name}
