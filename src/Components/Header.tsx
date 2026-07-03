@@ -1,8 +1,12 @@
 import { motion } from 'framer-motion'
-import { FaFacebook, FaWhatsapp, FaChevronDown } from 'react-icons/fa'
-import Logo from './Logo'
+import { FaFacebook, FaWhatsapp, FaChevronDown, FaReact, FaNodeJs, FaAndroid, FaApple } from 'react-icons/fa'
+import { SiTypescript, SiFirebase, SiNestjs, SiTailwindcss } from 'react-icons/si'
+import { OrbitingCircles } from './magicui/OrbitingCircles'
 import Navbar from './Navbar'
 import type { MainData, Language } from '../types'
+import corestackLogo from '../assets/corestack.png'
+
+const ELECTRIC_BLUE = '#0EA5FF'
 
 interface HeaderProps {
   data: MainData
@@ -20,6 +24,37 @@ const SECTORS: Record<string, string[]> = {
   ES: ['Restaurantes', 'Agricultura', 'Industria', 'Residenciales', 'Educación', 'Salud', 'Logística', 'Comercio', 'Construcción'],
 }
 
+// Logo actual = 130px de ancho (radio ~65px). Los radios de las órbitas dejan
+// un margen claro respecto al logo y entre sí, sin encimarse:
+//   logo borde 65px → anillo interior (radio 90, icono 32 → cubre 74–106px)
+//   → anillo exterior (radio 135, icono 38 → cubre 116–154px) → contenedor 340px (margen 170px)
+const LOGO_SIZE = 130
+
+function TechBadge({ children, color }: { children: React.ReactNode; color: string }) {
+  return (
+    <div
+      className="flex size-full items-center justify-center rounded-full border border-slate-700 bg-slate-800 shadow-lg"
+      style={{ color }}
+    >
+      {children}
+    </div>
+  )
+}
+
+const INNER_STACK = [
+  { icon: <FaReact size={18} />, color: '#61DAFB' },
+  { icon: <SiTypescript size={16} />, color: '#3178C6' },
+  { icon: <SiFirebase size={16} />, color: '#FFCA28' },
+  { icon: <FaNodeJs size={18} />, color: '#3C873A' },
+]
+
+const OUTER_STACK = [
+  { icon: <SiNestjs size={20} />, color: '#E0234E' },
+  { icon: <FaAndroid size={20} />, color: '#3DDC84' },
+  { icon: <FaApple size={20} />, color: '#E5E7EB' },
+  { icon: <SiTailwindcss size={20} />, color: '#38BDF8' },
+]
+
 const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
   <section id="home" className="relative min-h-screen bg-slate-900 flex flex-col">
     <Navbar language={language} toggleLanguage={toggleLanguage} />
@@ -31,10 +66,39 @@ const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
         transition={{ duration: 0.8 }}
         className="flex flex-col items-center gap-6 max-w-3xl"
       >
-        <Logo />
+        <div className="relative flex h-[340px] w-[340px] items-center justify-center">
+          <img
+            src={corestackLogo}
+            alt="Corestack"
+            width={LOGO_SIZE}
+            className="relative z-10"
+          />
 
-        <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight">
-          {data.name}
+          {/* Envuelve ambos anillos en su propio flex centrado (mismo truco de
+              static-position que ya arregla el centrado) para poder bajarle
+              la opacidad a la órbita completa sin afectar al logo. */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-30">
+            <OrbitingCircles radius={90} duration={32} iconSize={32} reverse>
+              {INNER_STACK.map((tech, i) => (
+                <TechBadge key={i} color={tech.color}>
+                  {tech.icon}
+                </TechBadge>
+              ))}
+            </OrbitingCircles>
+
+            <OrbitingCircles radius={135} duration={52} iconSize={38}>
+              {OUTER_STACK.map((tech, i) => (
+                <TechBadge key={i} color={tech.color}>
+                  {tech.icon}
+                </TechBadge>
+              ))}
+            </OrbitingCircles>
+          </div>
+        </div>
+
+        <h1 className="mt-2 text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight">
+          {data.name.split(' ').slice(0, -1).join(' ')}{' '}
+          <span style={{ color: ELECTRIC_BLUE }}>{data.name.split(' ').slice(-1)}</span>
         </h1>
 
         <p className="text-lg md:text-xl text-slate-300 leading-relaxed">
@@ -79,16 +143,19 @@ const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
         >
           {language === 'EN' ? 'Learn More' : 'Saber más'}
         </motion.button>
+
+        {/* En flujo normal (ya no absolute bottom-8): el espaciado del gap-6
+            del padre lo separa del botón automáticamente, sin importar la
+            altura de la pantalla — no puede volver a solaparse. */}
+        <button
+          onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
+          className="text-slate-500 hover:text-blue-400 transition-colors duration-200 animate-bounce"
+          aria-label="Scroll down"
+        >
+          <FaChevronDown size={24} />
+        </button>
       </motion.div>
     </div>
-
-    <button
-      onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
-      className="absolute bottom-8 left-1/2 -translate-x-1/2 text-slate-500 hover:text-blue-400 transition-colors duration-200 animate-bounce"
-      aria-label="Scroll down"
-    >
-      <FaChevronDown size={24} />
-    </button>
   </section>
 )
 
