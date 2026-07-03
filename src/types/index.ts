@@ -65,19 +65,8 @@ export interface PortfolioData {
   projects: Project[];
 }
 
-export interface Testimonial {
-  text: string;
-  user: string;
-  profile: string;
-}
-
-export interface TestimonialsData {
-  testimonials: Testimonial[];
-}
-
 export interface FullResumeData {
   main: MainData;
   resume: ResumeData;
   portfolio: PortfolioData;
-  testimonials: TestimonialsData;
 }

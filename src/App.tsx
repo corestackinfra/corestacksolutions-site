@@ -7,7 +7,6 @@ import About from './Components/About'
 import Resume from './Components/Resume'
 import Services from './Components/Services'
 import Portfolio from './Components/Portfolio'
-import Testimonials from './Components/Testimonials'
 import Contact from './Components/Contact'
 import Footer from './Components/Footer'
 import PolicyQRResidence from './Components/PolicyQRResidence'
@@ -41,7 +40,6 @@ function MainPage() {
       <Services language={language} />
       <Resume data={data.resume} language={language} />
       <Portfolio language={language} />
-      <Testimonials data={data.testimonials} language={language} />
       <Contact data={data.main} language={language} />
       <Footer data={data.main} />
     </>
