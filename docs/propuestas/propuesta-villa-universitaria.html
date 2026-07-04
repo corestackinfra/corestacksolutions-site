@@ -25,6 +25,7 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      z-index: 0;
     }
 
     /* ── Marca de agua — esquina inferior derecha, sangra al borde ── */
@@ -37,7 +38,7 @@
       height: 220px;
       background: url('../public/images/watermark.png') no-repeat right bottom / contain;
       pointer-events: none;
-      z-index: 0;
+      z-index: -1;
     }
 
     /* Carta: área imprimible = 11in − 2×1cm = 25.94 cm */
@@ -59,7 +60,7 @@
         display: flex !important;
         flex-direction: column !important;
       }
-      .page:last-child {
+      .page:last-of-type {
         page-break-after: avoid !important;
         break-after: avoid !important;
       }

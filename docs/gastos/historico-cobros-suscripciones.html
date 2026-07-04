@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Histórico de Cobros — Suscripciones · Corestack Solutions</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.65;
+      color: #1e293b;
+      background: #f1f5f9;
+    }
+
+    .page {
+      width: 8.5in;
+      min-height: 11in;
+      margin: 20px auto;
+      background: #fff;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 0;
+    }
+
+    .page::after {
+      content: '';
+      position: absolute;
+      bottom: 36px;
+      right: 0;
+      width: 220px;
+      height: 220px;
+      background: url('../../public/images/watermark.png') no-repeat right bottom / contain;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @page { size: letter; margin: 1cm; }
+
+    @media print {
+      body { background: #fff; overflow: hidden; }
+      .page {
+        width: 100% !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        min-height: 0 !important;
+        height: 25.94cm !important;
+        max-height: 25.94cm !important;
+        overflow: hidden !important;
+        page-break-after: always;
+        break-after: page;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .page:last-of-type { page-break-after: avoid !important; break-after: avoid !important; }
+      h1, h2, h3 { page-break-after: avoid; break-after: avoid; }
+      a { color: inherit; text-decoration: none; }
+    }
+
+    /* ── Header (pág. 1) ── */
+    .doc-header {
+      background: #0f1f3d;
+      padding: 20px 36px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+    .brand-name { font-size: 13pt; font-weight: 700; letter-spacing: 0.02em; color: #fff; }
+    .brand-sub { font-size: 7pt; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+    .doc-meta { text-align: right; font-size: 7.5pt; color: #94a3b8; line-height: 1.5; }
+    .doc-meta strong { color: #e2e8f0; font-size: 8.5pt; display: block; margin-bottom: 2px; }
+
+    .accent-bar { height: 4px; background: linear-gradient(90deg, #2563eb 0%, #38bdf8 100%); flex-shrink: 0; }
+
+    /* ── Title block ── */
+    .title-block { padding: 18px 36px 13px; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+    .doc-type { font-size: 7pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #2563eb; margin-bottom: 4px; }
+    .doc-title { font-size: 22pt; font-weight: 800; color: #0f1f3d; line-height: 1.1; margin-bottom: 3px; }
+    .doc-subtitle { font-size: 9.5pt; color: #475569; font-style: italic; }
+
+    /* ── Info row ── */
+    .info-row { display: flex; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+    .info-cell { flex: 1; padding: 8px 18px; border-right: 1px solid #e2e8f0; font-size: 8pt; }
+    .info-cell:last-child { border-right: none; }
+    .info-cell .label { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; display: block; margin-bottom: 1px; }
+    .info-cell .value { font-weight: 600; color: #1e293b; }
+
+    /* ── Page header (pág. 2) ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 36px;
+      border-bottom: 2px solid #2563eb;
+      flex-shrink: 0;
+    }
+    .ph-brand { font-size: 9pt; font-weight: 700; color: #0f1f3d; }
+    .ph-brand span { color: #2563eb; }
+    .ph-right { text-align: right; }
+    .ph-doc { font-size: 7pt; font-weight: 700; color: #0f1f3d; text-transform: uppercase; letter-spacing: 0.06em; }
+    .ph-folio { font-size: 6pt; color: #94a3b8; margin-top: 1px; }
+
+    /* ── Contenido ── */
+    .content { padding: 16px 36px 12px; flex: 1; }
+
+    .section { margin-bottom: 14px; }
+    .section-title {
+      font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #2563eb; padding-left: 9px; border-left: 3px solid #2563eb; margin-bottom: 8px;
+    }
+    p { margin-bottom: 7px; color: #334155; font-size: 9.5pt; line-height: 1.7; }
+    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 12px 0; }
+    .note { font-size: 7.5pt; color: #64748b; line-height: 1.55; margin-top: 4px; }
+
+    /* ── Callout ── */
+    .callout { border-radius: 0 4px 4px 0; padding: 9px 13px; margin: 9px 0; display: flex; gap: 9px; align-items: flex-start; }
+    .callout.info { background: #eff6ff; border-left: 4px solid #2563eb; }
+    .callout.warning { background: #fff7ed; border-left: 4px solid #f97316; }
+    .callout-icon { font-size: 11pt; flex-shrink: 0; margin-top: 1px; }
+    .callout p { margin: 0; font-size: 8.5pt; line-height: 1.55; }
+    .callout.info p { color: #1e3a5f; }
+    .callout.warning p { color: #7c2d12; }
+    .callout-title { font-size: 7.5pt; font-weight: 700; margin-bottom: 2px; }
+    .callout.info .callout-title { color: #1d4ed8; }
+    .callout.warning .callout-title { color: #c2410c; }
+
+    /* ── Data table (histórico de cobros) ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 8pt; margin: 8px 0; }
+    .data-table th { background: #0f1f3d; color: #fff; padding: 6px 8px; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; text-align: left; }
+    .data-table th.num { text-align: right; }
+    .data-table td { padding: 5px 8px; border-bottom: 1px solid #f1f5f9; font-size: 7.8pt; color: #334155; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .data-table td.mono { font-family: 'Courier New', monospace; font-size: 6.8pt; color: #64748b; }
+    .data-table td.muted { color: #94a3b8; }
+
+    /* ── Status pill ── */
+    .status { display: inline-block; font-size: 6.3pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+    .status.ok  { background: #ecfdf5; color: #059669; }
+    .status.est { background: #fff7ed; color: #c2410c; }
+    .status.gap { background: #fef2f2; color: #dc2626; }
+
+    /* ── Summary table ── */
+    .sum-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; margin: 9px 0; }
+    .sum-table th { background: #0f1f3d; color: #fff; padding: 7px 10px; font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .sum-table th:not(:first-child) { text-align: right; }
+    .sum-table td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; font-size: 8.3pt; color: #334155; }
+    .sum-table td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+    .sum-table tr.zero td { color: #94a3b8; }
+    .sum-table tr.total td { background: #0f1f3d; color: #fff; font-weight: 700; border-bottom: none; }
+    .sum-table tr.total td:last-child { color: #38bdf8; font-size: 10pt; }
+
+    /* ── Note list ── */
+    .note-list { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 5px; }
+    .note-list li { font-size: 8pt; color: #475569; padding-left: 14px; position: relative; line-height: 1.55; }
+    .note-list li::before { content: '—'; position: absolute; left: 0; color: #94a3b8; }
+    .note-list strong { color: #1e293b; }
+    .pending-text { color: #c2410c; font-weight: 700; }
+
+    /* ── Footer ── */
+    .doc-footer {
+      margin-top: auto;
+      padding: 9px 36px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7pt;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+    .footer-brand { font-weight: 700; color: #64748b; }
+    .doc-id { font-family: 'Courier New', monospace; font-size: 6.5pt; }
+  </style>
+</head>
+<body>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PÁGINA 1 — GITHUB + CANVA
+     ═══════════════════════════════════════════════════ -->
+<div class="page">
+
+  <div class="doc-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <img src="../../public/images/corestack.png" alt="Corestack" style="height:38px;flex-shrink:0;"/>
+      <div>
+        <div class="brand-name">Corestack Solutions</div>
+        <div class="brand-sub">Desarrollo · Infraestructura · Soporte Local</div>
+      </div>
+    </div>
+    <div class="doc-meta">
+      <strong>CS-GAS-001 · Reporte Interno</strong>
+      Tabasco, México · <span id="doc-date-header"></span><br>
+      Uso interno
+    </div>
+  </div>
+  <div class="accent-bar"></div>
+
+  <div class="title-block">
+    <div class="doc-type">Reporte Interno · Finanzas</div>
+    <div class="doc-title">Histórico de Cobros por Suscripción</div>
+    <div class="doc-subtitle">Railway · GitHub · Canva · Cloudflare · Claude — generado a partir de la revisión de correos en Gmail (corestack.sol@gmail.com)</div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-cell">
+      <span class="label">Cuenta revisada</span>
+      <span class="value">corestack.sol@gmail.com</span>
+    </div>
+    <div class="info-cell">
+      <span class="label">Generado el</span>
+      <span class="value">04 de julio de 2026</span>
+    </div>
+    <div class="info-cell">
+      <span class="label">Tipo de documento</span>
+      <span class="value">Reporte interno</span>
+    </div>
+    <div class="info-cell">
+      <span class="label">Folio</span>
+      <span class="value">CS-GAS-001</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="section">
+      <div class="section-title">Resumen</div>
+      <p>Este reporte consolida los cobros de suscripciones y compras asociadas a la operación de Corestack Solutions — Railway, GitHub, Canva, Cloudflare, Claude, Apple Developer Program, Google Play Developer e IoT/dispositivos — a partir de la revisión de correos y recibos en la cuenta <strong>corestack.sol@gmail.com</strong>, además de información proporcionada directamente por el usuario cuando no había recibo disponible.</p>
+      <p>Los montos marcados como <strong>Verificado</strong> corresponden a recibos abiertos y confirmados individualmente. Los marcados como <strong>Estimado</strong> se infieren por el patrón consistente de cobros del mismo servicio, sin recibo abierto. Los <strong>gaps</strong> señalan periodos sin recibo localizado en el correo.</p>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section">
+      <div class="section-title">GitHub — Team Plan (organización corestack-sol)</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha de cobro</th>
+            <th>Concepto</th>
+            <th>Periodo cubierto</th>
+            <th class="num">Monto</th>
+            <th>Método de pago</th>
+            <th>ID de transacción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>03 jun 2026</td>
+            <td>GitHub Team Plan</td>
+            <td>03 jun – 02 jul 2026</td>
+            <td class="num">$12.00 USD</td>
+            <td>MasterCard •••• 0161</td>
+            <td class="mono">ch_3TeJteJFr6CCHwIi1BCBCieT</td>
+          </tr>
+          <tr>
+            <td>03 jul 2026</td>
+            <td>GitHub Team Plan</td>
+            <td>03 jul – 02 ago 2026</td>
+            <td class="num">$12.00 USD</td>
+            <td>MasterCard •••• 0161</td>
+            <td class="mono">ch_3Tp9jqJFr6CCHwIi1pwdVQfm</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">Subtotal GitHub: <strong>$24.00 USD</strong> (2 cobros verificados) · Sin recibos anteriores a jun 2026 — probable inicio de la suscripción.</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section">
+      <div class="section-title">Canva — Suscripción mensual</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha de factura</th>
+            <th>Factura</th>
+            <th class="num">Monto</th>
+            <th>Método de pago</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>11 sep 2025</td>
+            <td class="mono">04636-51520821</td>
+            <td class="num">MXN 150.00</td>
+            <td>MasterCard •••• 0161</td>
+            <td><span class="status ok">Verificado</span></td>
+          </tr>
+          <tr>
+            <td>11 oct 2025</td>
+            <td class="muted">—</td>
+            <td class="num muted">—</td>
+            <td class="muted">—</td>
+            <td><span class="status gap">Sin recibo (gap)</span></td>
+          </tr>
+          <tr>
+            <td>11 nov 2025</td>
+            <td class="muted">—</td>
+            <td class="num muted">—</td>
+            <td class="muted">—</td>
+            <td><span class="status gap">Sin recibo (gap)</span></td>
+          </tr>
+          <tr>
+            <td>11 dic 2025</td>
+            <td class="muted">—</td>
+            <td class="num">~MXN 150.00</td>
+            <td>MasterCard •••• 0161</td>
+            <td><span class="status est">Estimado</span></td>
+          </tr>
+          <tr>
+            <td>11 ene 2026</td>
+            <td class="muted">—</td>
+            <td class="num">~MXN 150.00</td>
+            <td>MasterCard •••• 0161</td>
+            <td><span class="status est">Estimado</span></td>
+          </tr>
+          <tr>
+            <td>11 feb 2026</td>
+            <td class="muted">—</td>
+            <td class="num">~MXN 150.00</td>
+            <td>MasterCard •••• 0161</td>
+            <td><span class="status est">Estimado</span></td>
+          </tr>
+          <tr>
+            <td>11 mar 2026</td>
+            <td class="muted">—</td>
+            <td class="num">~MXN 150.00</td>
+            <td>MasterCard •••• 0161</td>
+            <td><span class="status est">Estimado</span></td>
+          </tr>
+          <tr>
+            <td>11 abr 2026</td>
+            <td class="mono">04848-44038787</td>
+            <td class="num">MXN 150.00</td>
+            <td>MasterCard •••• 0161</td>
+            <td><span class="status ok">Verificado</span></td>
+          </tr>
+          <tr>
+            <td>11 may 2026</td>
+            <td class="mono">04878-44885030</td>
+            <td class="num">MXN 150.00</td>
+            <td>MasterCard •••• 0161</td>
+            <td><span class="status ok">Verificado</span></td>
+          </tr>
+          <tr>
+            <td>11 jun 2026</td>
+            <td class="mono">04909-85459758</td>
+            <td class="num">MXN 150.00</td>
+            <td>MasterCard •••• 0161</td>
+            <td><span class="status ok">Verificado</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">Subtotal Canva: <strong>MXN 1,200.00</strong> (4 recibos verificados individualmente + 4 estimados por patrón consistente). Gap sin recibo en oct–nov 2025 (posible pausa o correo no recibido).</div>
+    </div>
+
+  </div>
+
+  <div class="doc-footer">
+    <span><span class="footer-brand">Corestack Solutions</span> · Reporte interno</span>
+    <span class="doc-id">CS-GAS-001</span>
+    <span>Pág. 1 / 4</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PÁGINA 2 — CLOUDFLARE + RAILWAY + CLAUDE FRONTEND
+     ═══════════════════════════════════════════════════ -->
+<div class="page">
+
+  <div class="page-header">
+    <div class="ph-brand">Corestack <span>Solutions</span></div>
+    <div class="ph-right">
+      <div class="ph-doc">Cloudflare · Railway · Claude Frontend</div>
+      <div class="ph-folio">CS-GAS-001 · Reporte Interno</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="section">
+      <div class="section-title">Cloudflare</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Concepto</th>
+            <th>ID Factura</th>
+            <th class="num">Monto</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>05 jun 2026</td>
+            <td>Registro de dominio corestacksolutions.com.mx</td>
+            <td class="mono">IN-67359191</td>
+            <td class="num">$16.75 USD</td>
+            <td><span class="status est">Factura emitida, cobro no confirmado</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">Única factura encontrada. Es una notificación de "factura disponible", no un recibo de pago confirmado. No se encontró evidencia de una suscripción recurrente de Cloudflare (ej. Workers Paid).</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section">
+      <div class="section-title">Railway</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha de pago</th>
+            <th>Periodo cubierto</th>
+            <th class="num">Monto</th>
+            <th>Recibo</th>
+            <th>Factura</th>
+            <th>Método de pago</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>08 may 2025</td>
+            <td>08 may – 08 jun 2025 (Hobby plan)</td>
+            <td class="num">$5.00 USD</td>
+            <td class="mono">2430-9716</td>
+            <td class="mono">A2C4C1AB-0001</td>
+            <td>•••• 7703</td>
+          </tr>
+          <tr>
+            <td>08 jun 2025</td>
+            <td>08 may – 08 jul 2025 (uso + Hobby)</td>
+            <td class="num">$7.34 USD</td>
+            <td class="mono">2397-0117</td>
+            <td class="mono">A2C4C1AB-0002</td>
+            <td>•••• 0161</td>
+          </tr>
+          <tr>
+            <td>11 ago 2025</td>
+            <td>08 jul – 08 sep 2025 (uso + Hobby)</td>
+            <td class="num">$13.98 USD</td>
+            <td class="mono">2402-7821</td>
+            <td class="mono">A2C4C1AB-0004</td>
+            <td>•••• 0161</td>
+          </tr>
+          <tr>
+            <td>08 sep 2025</td>
+            <td>08 ago – 08 oct 2025 (uso + Hobby)</td>
+            <td class="num">$15.22 USD</td>
+            <td class="mono">2258-7109</td>
+            <td class="mono">A2C4C1AB-0005</td>
+            <td>•••• 0161</td>
+          </tr>
+          <tr>
+            <td>08 ene 2026</td>
+            <td>08 dic 2025 – 08 feb 2026 (uso + Hobby)</td>
+            <td class="num">$21.15 USD</td>
+            <td class="mono">2115-8207</td>
+            <td class="mono">A2C4C1AB-0009</td>
+            <td>•••• 0161</td>
+          </tr>
+          <tr>
+            <td>08 mar 2026</td>
+            <td>08 feb – 08 abr 2026 (uso + Hobby)</td>
+            <td class="num">$14.73 USD</td>
+            <td class="mono">2914-1097</td>
+            <td class="mono">A2C4C1AB-0011</td>
+            <td>•••• 0161</td>
+          </tr>
+          <tr>
+            <td>08 may 2026</td>
+            <td>08 abr – 08 jun 2026 (uso + Hobby)</td>
+            <td class="num">$21.67 USD</td>
+            <td class="mono">2330-7200</td>
+            <td class="mono">A2C4C1AB-0013</td>
+            <td>•••• 0161</td>
+          </tr>
+          <tr>
+            <td>08 jun 2026</td>
+            <td>08 may – 08 jul 2026 (uso + Hobby)</td>
+            <td class="num">$22.57 USD</td>
+            <td class="mono">2111-3512</td>
+            <td class="mono">A2C4C1AB-0014</td>
+            <td>•••• 0161</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">Subtotal Railway: <strong>$121.66 USD</strong> (8 cobros verificados). Estos recibos llegaron reenviados desde una cuenta distinta (ariakisb@gmail.com → corestack.sol@gmail.com), no desde Railway directamente a esta cuenta. Es un plan Hobby ($5/mes base) + consumo variable (disco, red, vCPU, memoria), por eso el monto cambia cada mes. <strong>Huecos detectados:</strong> la numeración de facturas salta de 0002→0004, 0005→0009, y 0011→0013→0014, sugiriendo que faltan los recibos de jul 2025, oct–dic 2025 y abr 2026 (no fueron reenviados o no se encontraron en el correo). El total real de estos meses probablemente sea mayor a $121.66 USD.</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section">
+      <div class="section-title">Claude — Frontend (Claude Pro)</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha de cobro</th>
+            <th>Concepto</th>
+            <th>Periodo cubierto</th>
+            <th class="num">Monto</th>
+            <th>Recibo</th>
+            <th>Factura</th>
+            <th>Método de pago</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>28 abr 2026</td>
+            <td>Claude Pro</td>
+            <td>28 abr – 28 may 2026</td>
+            <td class="num">$20.00 USD</td>
+            <td class="mono">2579-2539-4212</td>
+            <td class="mono">QGJQICGV-0001</td>
+            <td>MasterCard •••• 0161</td>
+          </tr>
+          <tr>
+            <td>28 may 2026</td>
+            <td>Claude Pro</td>
+            <td>28 may – 28 jun 2026</td>
+            <td class="num">$20.00 USD</td>
+            <td class="mono">2731-9175-0344</td>
+            <td class="mono">QGJQICGV-0002</td>
+            <td>MasterCard •••• 0161</td>
+          </tr>
+          <tr>
+            <td>28 jun 2026</td>
+            <td>Claude Pro</td>
+            <td>28 jun – 28 jul 2026</td>
+            <td class="num">$20.00 USD</td>
+            <td class="mono">2639-6161-1879</td>
+            <td class="mono">QGJQICGV-0003</td>
+            <td>MasterCard •••• 0161</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">Subtotal Claude Frontend: <strong>$60.00 USD</strong> (3 cobros verificados, mismo monto mensual). El primero de la serie es abr 2026 (invoice QGJQICGV-0001) — probable inicio de la suscripción. Recibos reenviados en un solo correo desde corestack.fe@gmail.com.</div>
+    </div>
+
+  </div>
+
+  <div class="doc-footer">
+    <span><span class="footer-brand">Corestack Solutions</span> · corestack.sol@gmail.com</span>
+    <span class="doc-id">CS-GAS-001 · Uso interno</span>
+    <span>Pág. 2 / 4</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PÁGINA 3 — CLAUDE BACKEND + DEVELOPER PROGRAMS + IOT
+     ═══════════════════════════════════════════════════ -->
+<div class="page">
+
+  <div class="page-header">
+    <div class="ph-brand">Corestack <span>Solutions</span></div>
+    <div class="ph-right">
+      <div class="ph-doc">Claude Backend · Developer Programs · IoT</div>
+      <div class="ph-folio">CS-GAS-001 · Reporte Interno</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="section">
+      <div class="section-title">Claude — Backend (Claude Pro)</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha de cobro</th>
+            <th>Concepto</th>
+            <th>Periodo cubierto</th>
+            <th class="num">Monto</th>
+            <th>Recibo</th>
+            <th>Factura</th>
+            <th>Método de pago</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>28 abr 2026</td>
+            <td>Claude Pro</td>
+            <td>28 abr – 28 may 2026</td>
+            <td class="num">$20.00 USD</td>
+            <td class="mono">2746-0883-6956</td>
+            <td class="mono">DR6QW2ZJ-0001</td>
+            <td>MasterCard •••• 0161</td>
+          </tr>
+          <tr>
+            <td>28 may 2026</td>
+            <td>Claude Pro</td>
+            <td>28 may – 28 jun 2026</td>
+            <td class="num">$20.00 USD</td>
+            <td class="mono">2215-6356-3933</td>
+            <td class="mono">DR6QW2ZJ-0002</td>
+            <td>MasterCard •••• 0161</td>
+          </tr>
+          <tr>
+            <td>28 jun 2026</td>
+            <td>Claude Pro</td>
+            <td>28 jun – 28 jul 2026</td>
+            <td class="num">$20.00 USD</td>
+            <td class="mono">2465-2829-7376</td>
+            <td class="mono">DR6QW2ZJ-0003</td>
+            <td>MasterCard •••• 0161</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">Subtotal Claude Backend: <strong>$60.00 USD</strong> (3 cobros verificados, mismo monto mensual). El primero de la serie es abr 2026 (invoice DR6QW2ZJ-0001) — probable inicio de la suscripción, misma fecha de arranque que la cuenta Frontend. Recibos reenviados en un solo correo desde corestack.be@gmail.com.</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section">
+      <div class="section-title">Developer Programs — Apple &amp; Google Play</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Plataforma</th>
+            <th>Fecha de cobro</th>
+            <th>Concepto</th>
+            <th>Vigencia</th>
+            <th class="num">Monto</th>
+            <th>Referencia</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Apple</td>
+            <td>~07 oct 2025</td>
+            <td>Apple Developer Program (membresía anual)</td>
+            <td>07 oct 2025 – 06 oct 2026</td>
+            <td class="num">~$99.00 USD</td>
+            <td class="muted">—</td>
+            <td><span class="status est">Estimación</span></td>
+          </tr>
+          <tr>
+            <td>Google Play</td>
+            <td>06 abr 2025</td>
+            <td>Developer Registration Fee (cuota única)</td>
+            <td class="muted">— (no recurrente)</td>
+            <td class="num">$25.00 USD</td>
+            <td class="mono">Visa •••• 6619 · PDS.6110-1816-5007-65565</td>
+            <td><span class="status ok">Verificado</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note"><strong>Apple:</strong> no se encontró ningún recibo o factura de pago en el correo. El monto de <strong>$99.00 USD</strong> es el precio estándar publicado del Apple Developer Program (no verificado contra un recibo real de esta cuenta), y la fecha se estima a partir del correo de bienvenida al programa ("Welcome to the Apple Developer Program") del <strong>07 oct 2025</strong>, ya que Apple cobra la membresía al momento de la inscripción. La próxima renovación sería alrededor de oct 2026 (aún no ha ocurrido). Es posible que Apple no envíe recibo por correo a esta cuenta de Gmail, o que el cobro se gestione directamente vía Apple ID sin notificación aquí. La app "QR Residential Access Control" fue aprobada y publicada en el App Store en abr 2026, bajo esta membresía.</div>
+      <div class="note" style="margin-top:6px;"><strong>Google Play:</strong> cuota única de registro para Google Play Console (no es recurrente — Google Play cobra una sola vez, a diferencia de Apple que es anual). Subtotal Google Play: <strong>$25.00 USD</strong>.</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section">
+      <div class="section-title">IoT y Dispositivos</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Concepto</th>
+            <th class="num">Monto</th>
+            <th>Fuente</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="muted">No especificada</td>
+            <td>iPhone</td>
+            <td class="num">MXN 13,000.00</td>
+            <td>Proporcionado directamente por el usuario</td>
+            <td><span class="status gap">No verificado por correo</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">Se buscó en el correo cualquier compra relacionada con hardware/IoT (Arduino, ESP32, Raspberry Pi, sensores, Amazon, MercadoLibre, AliExpress) y no se encontró ningún recibo o confirmación de compra. El único registro en esta sección es el iPhone por <strong>MXN 13,000.00</strong>, proporcionado directamente por el usuario (no confirmado contra un recibo de correo electrónico, y sin fecha especificada).</div>
+    </div>
+
+  </div>
+
+  <div class="doc-footer">
+    <span><span class="footer-brand">Corestack Solutions</span> · corestack.sol@gmail.com</span>
+    <span class="doc-id">CS-GAS-001 · Uso interno</span>
+    <span>Pág. 3 / 4</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PÁGINA 4 — RESUMEN CONSOLIDADO + NOTAS METODOLÓGICAS
+     ═══════════════════════════════════════════════════ -->
+<div class="page">
+
+  <div class="page-header">
+    <div class="ph-brand">Corestack <span>Solutions</span></div>
+    <div class="ph-right">
+      <div class="ph-doc">Resumen Consolidado · Notas Metodológicas</div>
+      <div class="ph-folio">CS-GAS-001 · Reporte Interno</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="section">
+      <div class="section-title">Resumen consolidado — todos los servicios</div>
+      <table class="sum-table">
+        <thead>
+          <tr>
+            <th>Servicio</th>
+            <th># de cobros</th>
+            <th>Monto por cobro</th>
+            <th>Total original</th>
+            <th>Tipo de cambio aplicado</th>
+            <th>Total en MXN (estimado)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GitHub</td>
+            <td>2</td>
+            <td>$12.00 USD</td>
+            <td>$24.00 USD</td>
+            <td>18.15 MXN/USD</td>
+            <td>$435.60 MXN</td>
+          </tr>
+          <tr>
+            <td>Cloudflare</td>
+            <td>1</td>
+            <td>$16.75 USD</td>
+            <td>$16.75 USD</td>
+            <td>18.15 MXN/USD</td>
+            <td>$304.01 MXN</td>
+          </tr>
+          <tr>
+            <td>Canva</td>
+            <td>8</td>
+            <td>MXN 150.00</td>
+            <td>MXN 1,200.00</td>
+            <td>— (ya en MXN)</td>
+            <td>$1,200.00 MXN</td>
+          </tr>
+          <tr>
+            <td>Railway</td>
+            <td>8</td>
+            <td>Variable</td>
+            <td>$121.66 USD</td>
+            <td>18.15 MXN/USD</td>
+            <td>$2,208.13 MXN</td>
+          </tr>
+          <tr>
+            <td>Claude Frontend</td>
+            <td>3</td>
+            <td>$20.00 USD</td>
+            <td>$60.00 USD</td>
+            <td>18.15 MXN/USD</td>
+            <td>$1,089.00 MXN</td>
+          </tr>
+          <tr>
+            <td>Claude Backend</td>
+            <td>3</td>
+            <td>$20.00 USD</td>
+            <td>$60.00 USD</td>
+            <td>18.15 MXN/USD</td>
+            <td>$1,089.00 MXN</td>
+          </tr>
+          <tr>
+            <td>Apple Developer</td>
+            <td>1</td>
+            <td>~$99.00 USD</td>
+            <td>~$99.00 USD</td>
+            <td>18.15 MXN/USD</td>
+            <td>~$1,797.35 MXN</td>
+          </tr>
+          <tr>
+            <td>Google Play Developer</td>
+            <td>1</td>
+            <td>$25.00 USD</td>
+            <td>$25.00 USD</td>
+            <td>18.15 MXN/USD</td>
+            <td>$453.75 MXN</td>
+          </tr>
+          <tr>
+            <td>IoT y Dispositivos</td>
+            <td>1</td>
+            <td>MXN 13,000.00</td>
+            <td>MXN 13,000.00</td>
+            <td>— (ya en MXN)</td>
+            <td>$13,000.00 MXN</td>
+          </tr>
+          <tr class="total">
+            <td colspan="5">Total general estimado</td>
+            <td>~$21,576.84 MXN</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">Esta tabla concentra el total de cada servicio revisado; ver secciones anteriores para el detalle recibo por recibo y las notas de verificación.</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section">
+      <div class="section-title">Notas metodológicas</div>
+      <ul class="note-list">
+        <li><strong>Verificado:</strong> monto confirmado abriendo el correo/recibo individual.</li>
+        <li><strong>Estimación:</strong> monto inferido por patrón consistente en recibos verificados del mismo servicio, no abierto individualmente.</li>
+        <li>El tipo de cambio de <strong>18.15 MXN/USD</strong> es un promedio estimado del periodo sep 2025 – jul 2026, calculado ponderando el promedio anual 2025 (19.202) y el promedio 2026 a la fecha (17.479). No corresponde al tipo de cambio FIX real de cada fecha de cobro específica; para cifras exactas de contabilidad o fiscales se recomienda consultar el tipo de cambio FIX de Banxico (banxico.org.mx) para cada fecha puntual.</li>
+        <li><strong>Cloudflare:</strong> la única factura encontrada corresponde a una notificación de "factura disponible", no a un recibo de pago confirmado.</li>
+        <li><strong>Railway:</strong> 8 recibos verificados (mayo 2025 – jun 2026), reenviados desde una cuenta distinta (ariakisb@gmail.com). Plan Hobby + consumo variable. Hay huecos en la numeración de facturas — probablemente faltan los recibos de jul 2025, oct–dic 2025 y abr 2026 — por lo que el total real de Railway es probablemente mayor a los $121.66 USD documentados aquí.</li>
+        <li><strong>Claude Frontend y Backend:</strong> ambas cuentas iniciaron el mismo mes (abr 2026) con el mismo monto mensual ($20 USD c/u), sumando $40 USD/mes en total entre las dos.</li>
+        <li><strong>Apple Developer Program:</strong> sin recibo verificado. El cargo de ~$99 USD (07 oct 2025) es una estimación basada en el precio estándar publicado por Apple y en la fecha de inscripción al programa, no en un recibo real encontrado en el correo. Tratar este monto con reserva para fines contables — se recomienda confirmar directamente en el Apple ID o extracto bancario.</li>
+        <li><strong>Google Play Developer:</strong> cuota única de $25 USD (no recurrente), a diferencia de Apple que se renueva anualmente.</li>
+        <li><strong>IoT y Dispositivos:</strong> no se encontraron compras de hardware/IoT en el correo. El monto del iPhone (MXN 13,000.00) fue proporcionado directamente por el usuario, no confirmado por recibo, y sin fecha especificada.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="doc-footer">
+    <span><span class="footer-brand">Corestack Solutions</span> · corestack.sol@gmail.com</span>
+    <span class="doc-id">CS-GAS-001 · Uso interno</span>
+    <span>Pág. 4 / 4</span>
+  </div>
+</div>
+
+
+<script>
+  const fecha = new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('doc-date-header').textContent = fecha;
+</script>
+</body>
+</html>
