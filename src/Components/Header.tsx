@@ -67,11 +67,22 @@ const Header = ({ data, language, toggleLanguage }: HeaderProps) => (
         className="flex flex-col items-center gap-6 max-w-3xl"
       >
         <div className="relative flex h-[340px] w-[340px] items-center justify-center">
+          {/* Halo pulsante detrás del logo — glow azul eléctrico, lento y compacto */}
+          <div
+            className="absolute z-0 animate-glow-pulse motion-reduce:animate-none rounded-full blur-md"
+            style={{
+              width: LOGO_SIZE * 0.42,
+              height: LOGO_SIZE * 0.42,
+              background:
+                'radial-gradient(circle, rgba(14,165,255,0.3) 0%, rgba(14,165,255,0.12) 45%, transparent 75%)',
+            }}
+          />
+
           <img
             src={corestackLogo}
             alt="Corestack"
             width={LOGO_SIZE}
-            className="relative z-10"
+            className="relative z-10 animate-edge-glow motion-reduce:animate-none"
           />
 
           {/* Envuelve ambos anillos en su propio flex centrado (mismo truco de
